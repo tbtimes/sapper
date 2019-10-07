@@ -23,7 +23,8 @@ type Opts = {
 	concurrent?: number,
 	oninfo?: ({ message }: { message: string }) => void;
 	onfile?: ({ file, size, status }: { file: string, size: number, status: number }) => void;
-	entry?: string;
+	entry?: string,
+	entry_only?: boolean,
 };
 
 type Ref = {
@@ -60,7 +61,8 @@ async function _export({
 	concurrent = 8,
 	oninfo = noop,
 	onfile = noop,
-	entry = '/'
+	entry = '/',
+	entry_only = false,
 }: Opts = {}) {
 	basepath = basepath.replace(/^\//, '')
 
@@ -208,9 +210,8 @@ async function _export({
 				}
 			});
 
-			if (pathname !== '/service-worker-index.html') {
+			if (pathname !== '/service-worker-index.html' && !entry_only) {
 				const cleaned = clean_html(body);
-
 				const base_match = /<base ([\s\S]+?)>/m.exec(cleaned);
 				const base_href = base_match && get_href(base_match[1]);
 				const base = resolve(url.href, base_href);
