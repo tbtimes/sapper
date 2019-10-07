@@ -25,6 +25,7 @@ type Opts = {
 	onfile?: ({ file, size, status }: { file: string, size: number, status: number }) => void;
 	entry?: string,
 	entry_only?: boolean,
+	filter?: string,
 };
 
 type Ref = {
@@ -63,6 +64,7 @@ async function _export({
 	onfile = noop,
 	entry = '/',
 	entry_only = false,
+	filter = '',
 }: Opts = {}) {
 	basepath = basepath.replace(/^\//, '')
 
@@ -95,6 +97,8 @@ async function _export({
 
 		return entry;
 	});
+
+	const urlFilters = new RegExp(filter.split(' ').map(str => `(?:${str})`).join('|'));
 
 	const proc = child_process.fork(path.resolve(`${build_dir}/server/server.js`), [], {
 		cwd,
@@ -223,7 +227,7 @@ async function _export({
 					const attrs = match[1];
 					const href = get_href(attrs);
 
-					if (href) {
+					if (href && (!filter || urlFilters.test(href))) {
 						const url = resolve(base.href, href);
 
 						if (url.protocol === protocol && url.host === host) {

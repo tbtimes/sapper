@@ -208,6 +208,7 @@ prog.command('export [dest]')
 	.option('--ext', 'Custom page route extensions (space separated)', '.svelte .html')
 	.option('--entry', 'Custom entry points (space separated)', '/')
 	.option('--entry_only', 'Render only the entry points')
+	.option('--filter', 'Space delimited regular expression syntax whitelist for link crawling')
 	.action(async (dest = '__sapper__/export', opts: {
 		build: boolean,
 		legacy: boolean,
@@ -225,6 +226,7 @@ prog.command('export [dest]')
 		ext: string,
 		entry: string,
 		entry_only: boolean,
+		filter: string,
 	}) => {
 		try {
 			if (opts.build) {
@@ -247,6 +249,7 @@ prog.command('export [dest]')
 				concurrent: opts.concurrent,
 				entry: opts.entry,
 				entry_only: opts.entry_only,
+				filter: opts.filter,
 
 				oninfo: event => {
 					console.log(colors.bold().cyan(`> ${event.message}`));
