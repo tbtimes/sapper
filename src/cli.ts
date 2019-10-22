@@ -207,6 +207,7 @@ prog.command('export [dest]')
 	.option('--build-dir', 'Intermediate build directory', '__sapper__/build')
 	.option('--ext', 'Custom page route extensions (space separated)', '.svelte .html')
 	.option('--entry', 'Custom entry points (space separated)', '/')
+	.option('--quiet', 'Silence oninfo and onfile export events', false)
 	.action(async (dest = '__sapper__/export', opts: {
 		build: boolean,
 		legacy: boolean,
@@ -221,8 +222,9 @@ prog.command('export [dest]')
 		static: string,
 		output: string,
 		'build-dir': string,
-		ext: string
-		entry: string
+		ext: string,
+		entry: string,
+		quiet: boolean,
 	}) => {
 		try {
 			if (opts.build) {
@@ -246,11 +248,14 @@ prog.command('export [dest]')
 				entry: opts.entry,
 
 				oninfo: event => {
-					console.log(colors.bold().cyan(`> ${event.message}`));
+					if (!opts.quiet) {
+						console.log(colors.bold().cyan(`> ${event.message}`));
+					}
 				},
 
 				onfile: event => {
-					const size_color = event.size > 150000 ? colors.bold().red : event.size > 50000 ? colors.bold().yellow : colors.bold().gray;
+					if (!opts.quiet) {
+						const size_color = event.size > 150000 ? colors.bold().red : event.size > 50000 ? colors.bold().yellow : colors.bold().gray;
 						const size_label = size_color(left_pad(pb(event.size), 10));
 
 						const file_label = event.status === 200
@@ -258,6 +263,7 @@ prog.command('export [dest]')
 							: colors.bold()[event.status >= 400 ? 'red' : 'yellow'](`(${event.status}) ${event.file}`);
 
 						console.log(`${size_label}   ${file_label}`);
+					}
 				}
 			});
 
