@@ -209,6 +209,7 @@ prog.command('export [dest]')
 	.option('--entry', 'Custom entry points (space separated)', '/')
 	.option('--entry_only', 'Render only the entry points')
 	.option('--filter', 'Space delimited regular expression syntax whitelist for link crawling')
+	.option('--quiet', 'Silence oninfo and onfile export events', false)
 	.action(async (dest = '__sapper__/export', opts: {
 		build: boolean,
 		legacy: boolean,
@@ -227,6 +228,7 @@ prog.command('export [dest]')
 		entry: string,
 		entry_only: boolean,
 		filter: string,
+		quiet: boolean,
 	}) => {
 		try {
 			if (opts.build) {
@@ -252,11 +254,14 @@ prog.command('export [dest]')
 				filter: opts.filter,
 
 				oninfo: event => {
-					console.log(colors.bold().cyan(`> ${event.message}`));
+					if (!opts.quiet) {
+						console.log(colors.bold().cyan(`> ${event.message}`));
+					}
 				},
 
 				onfile: event => {
-					const size_color = event.size > 150000 ? colors.bold().red : event.size > 50000 ? colors.bold().yellow : colors.bold().gray;
+					if (!opts.quiet) {
+						const size_color = event.size > 150000 ? colors.bold().red : event.size > 50000 ? colors.bold().yellow : colors.bold().gray;
 						const size_label = size_color(left_pad(pb(event.size), 10));
 
 						const file_label = event.status === 200
@@ -264,6 +269,7 @@ prog.command('export [dest]')
 							: colors.bold()[event.status >= 400 ? 'red' : 'yellow'](`(${event.status}) ${event.file}`);
 
 						console.log(`${size_label}   ${file_label}`);
+					}
 				}
 			});
 
