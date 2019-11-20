@@ -210,6 +210,7 @@ prog.command('export [dest]')
 	.option('--entry_only', 'Render only the entry points')
 	.option('--filter', 'Space delimited regular expression syntax whitelist for link crawling')
 	.option('--quiet', 'Silence oninfo and onfile export events', false)
+	.option('--urls_file', 'Path to JSON file containing an array of URLs export')
 	.action(async (dest = '__sapper__/export', opts: {
 		build: boolean,
 		legacy: boolean,
@@ -229,6 +230,7 @@ prog.command('export [dest]')
 		entry_only: boolean,
 		filter: string,
 		quiet: boolean,
+		urls_file: string,
 	}) => {
 		try {
 			if (opts.build) {
@@ -252,6 +254,7 @@ prog.command('export [dest]')
 				entry: opts.entry,
 				entry_only: opts.entry_only,
 				filter: opts.filter,
+				urls_file: opts.urls_file,
 
 				oninfo: event => {
 					if (!opts.quiet) {

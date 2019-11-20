@@ -26,6 +26,7 @@ type Opts = {
 	entry?: string,
 	entry_only?: boolean,
 	filter?: string,
+	urls_file?: string,
 };
 
 type Ref = {
@@ -65,6 +66,7 @@ async function _export({
 	entry = '/',
 	entry_only = false,
 	filter = '',
+	urls_file,
 }: Opts = {}) {
 	basepath = basepath.replace(/^\//, '')
 
@@ -91,12 +93,35 @@ async function _export({
 	const root = resolve(origin, basepath);
 	if (!root.href.endsWith('/')) root.href += '/';
 
-	const entryPoints = entry.split(' ').map(entryPoint => {
+	function entryFromURL(entryPoint: string) {
 		const entry = resolve(origin, `${basepath}/${cleanPath(entryPoint)}`);
 		if (!entry.href.endsWith('/')) entry.href += '/';
 
 		return entry;
-	});
+	};
+
+	const entryPoints = entry.split(' ').map(entryFromURL);
+	let urls: URL[] = [];
+
+	if (urls_file) {
+		const urls_path = path.resolve(urls_file);
+		if (!fs.existsSync(urls_path)) {
+			console.error(`could not find file passed as urls_file option: ${urls_path}`);
+			process.exit(1);
+		}
+		try {
+			const urls = JSON.parse(fs.readFileSync(urls_path, 'utf8'));
+
+			if (!Array.isArray(urls)) {
+				throw new Error('expecting json file with an array of urls');
+			}
+
+			entryPoints.push(...urls.map(entryFromURL));
+		} catch (err) {
+			console.error(err);
+			process.exit(1);
+		}
+	}
 
 	const urlFilters = new RegExp(filter.split(' ').map(str => `(?:${str})`).join('|'));
 
@@ -209,7 +234,7 @@ async function _export({
 				}
 			});
 
-			if (pathname !== '/service-worker-index.html' && !entry_only) {
+			if (pathname !== '/service-worker-index.html' && !entry_only && !urls_file) {
 				const cleaned = clean_html(body);
 				const base_match = /<base ([\s\S]+?)>/m.exec(cleaned);
 				const base_href = base_match && get_href(base_match[1]);
@@ -251,6 +276,7 @@ async function _export({
 		host_header,
 		protocol,
 		root,
+		urls_file,
 	};
 
 	const queue = exportQueue({

@@ -8,6 +8,7 @@ type FetchOpts = {
 	root: URL;
 	host: string;
 	host_header?: string;
+	urls_file?: string;
 };
 
 type FetchRet = {
