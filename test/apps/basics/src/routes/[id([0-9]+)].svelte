@@ -1,6 +1,6 @@
 <script>
-	import { stores } from '@sapper/app';
-	const { page } = stores();
+  import { stores } from "@sapper/app";
+  const { page } = stores();
 </script>
 
 <h1>Regexp page {$page.params.id}</h1>
