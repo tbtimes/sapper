@@ -58,8 +58,7 @@
     "webpack-format-messages": "^2.0.5",
     "yootils": "0.0.16"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "peerDependencies": {
     "svelte": "^3.5.0"
   },
